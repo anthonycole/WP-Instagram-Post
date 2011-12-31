@@ -37,7 +37,7 @@ class WP_Instagram_Post {
 	public static function forge() {
 		add_action( 'admin_init', get_class() . '::settings_init' );
 		add_action( 'admin_menu', get_class() . '::register_options_page' );
-		add_action( 'wp', get_class() . '::listen' );	
+		add_action( 'init', get_class() . '::listen' );	
 			
 	}
 	
@@ -204,6 +204,9 @@ class WP_Instagram_Post {
 	 * @author Anthony Cole
 	 **/
 	public static function listen() {
+		if( !strpos( $_SERVER['REQUEST_URI'], 'wp-admin' ) ) 
+			return false;
+			
 		$instagram = self::setup_api();
 		$instagram->SubscriptionListener();
 	}

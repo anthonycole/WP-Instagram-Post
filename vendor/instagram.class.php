@@ -189,7 +189,7 @@ class Instagram {
    * @return mixed
    */
   public function SubscriptionChallenge() {
-  		echo $_GET['hub.challenge'];
+  		echo $_GET['hub_challenge'];
 		exit();
   }
 
@@ -199,7 +199,7 @@ class Instagram {
    * @return mixed
    */
   public function AddUserSubscription( ) {
-	$this->_makeCall( 'subscriptions', array( 'object' => 'user', 'aspect' => 'media' ) );
+	$this->__makeCall( 'subscriptions', array( 'object' => 'user', 'aspect' => 'media' ) );
   }
 
   /**
@@ -209,12 +209,12 @@ class Instagram {
    */
   public function SubscriptionListener() {
 	
-	if( isset($_GET['hub.challenge']) ) {
+	if( isset($_GET['hub_challenge']) ) {
 		$this->SubscriptionChallenge();
-	} else {
-		return true;
 	}
   }
+  
+
 
   /**
    * Get the OAuth data of a user by the returned callback code
