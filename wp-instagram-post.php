@@ -24,10 +24,10 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
+require_once('vendor/instagram.class.php');
 
 
 class WP_Instagram_Post {
-	
 	/**
 	 * Our firing action
 	 *
@@ -69,9 +69,46 @@ class WP_Instagram_Post {
 	 * @author Anthony Cole
 	 **/
 	public static function plugin_text() {
-		echo "<p>In order to get this plugin working, you're going to need to create an application with instagram. See <a href='http://instagr.am/developer/'>here</a> for instructions. </p>";
+		
+		
+		if( !self::api_done() ) : 
+			echo "<p>In order to get this plugin working, you're going to need to create an application with instagram. See <a href='http://instagr.am/developer/'>here</a> for instructions. </p>";
+		else : 
+			$option = get_option('wpinstac_oauth');
+			echo "<p>You are logged Into Instagram as " .  $option->user->username . "</p>";
+		endif;
+		
 	}
 	
+	/**
+	 * Check if the user has inputted settings.
+	 *
+	 * @return void
+	 * @author Anthony Cole
+	 **/
+	public static function app_setup() {
+		$option = get_option( 'wpinstac_options' );
+		
+		if( isset( $option['client_id'] ) && isset($option['client_secret']) ) 
+			return true;
+	}
+	
+	/**
+	 * Instantiate the Instagram class
+	 *
+	 * @return void
+	 * @author Anthony Cole
+	 **/
+	public static function setup_api() {
+		$option = get_option( 'wpinstac_options' );
+		$options = array(
+		   'apiKey'      => $option['client_id'],
+		   'apiSecret'   => $option['client_secret'],
+		   'apiCallback' => admin_url('options-general.php?page=wpinstac')
+		);
+		$instagram = new Instagram( $options );
+		return $instagram;
+	}
 	
 	/**
 	 * Client ID Field
@@ -83,7 +120,6 @@ class WP_Instagram_Post {
 		$option = get_option('wpinstac_options');
 		echo "<input id='wpinstac_client_id' name='wpinstac_options[client_id]' size='40' type='text' value='{$option['client_id']}' />";
 	}
-	
 	
 	/**
 	 * Client Secret Field.
@@ -97,12 +133,42 @@ class WP_Instagram_Post {
 	}
 	
 	/**
+	 * Saves the oAuth token.
+	 *
+	 * @return void
+	 * @author Anthony Cole
+	 **/
+	public static function oauth_save() {
+		$instagram = self::setup_api();
+		$userData = $instagram->getOAuthToken($_GET['code']);	
+		update_option('wpinstac_oauth', $userData );
+	}
+	
+	/**
+	 * Checks if the oAuth.
+	 *
+	 * @return void
+	 * @author Anthony Cole
+	 **/
+	public static function api_done() {
+		$option = get_option( 'wpinstac_oauth' );
+		
+		if( !isset($option->access_token) )
+			return false;
+		else
+			return true;
+	}
+	
+	/**
 	 * Options Page
 	 *
 	 * @return void
 	 * @author Anthony Cole
 	 **/
 	public static function options_page() {
+		if( isset($_GET['code'] ) ) : 
+			self::oauth_save();
+		endif;
 		?>
 		<div class="wrap">
 			<h2>Instagram Settings</h2>
@@ -111,6 +177,12 @@ class WP_Instagram_Post {
 				<?php do_settings_sections( 'wpinstac' ); ?>
 				<input name="Submit" type="submit" value="<?php esc_attr_e('Save Changes'); ?>" />
 			</form>
+			<?php if( self::app_setup() && !self::api_done() ) :
+			$instagram = self::setup_api(); 
+			?>
+			<a href="<?php echo $instagram->getLoginUrl(); ?>">Log Into Instagram</a>
+			<?php endif; ?>
+
 		</div>
 		<?php
 	}
