@@ -187,6 +187,15 @@ class WP_Instagram_Post {
 				<?php do_settings_sections( 'wpinstac' ); ?>
 				<input name="Submit" type="submit" value="<?php esc_attr_e('Save Changes'); ?>" />
 			</form>
+			<?php
+			
+				$instagram = self::setup_api(); 
+				var_dump($instagram->getMedia(3)->data->images->standard_resolution->url);
+				var_dump($instagram->getMedia(3)->data->caption);
+	
+				
+				
+			?>
 			
 			<?php if( self::app_setup() && !self::api_done() ) :
 			$instagram = self::setup_api(); 
@@ -206,9 +215,32 @@ class WP_Instagram_Post {
 	public static function listen() {
 		if( !strpos( $_SERVER['REQUEST_URI'], 'wp-admin' ) ) 
 			return false;
-			
-		$instagram = self::setup_api();
-		$instagram->SubscriptionListener();
+		
+		if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+
+			$decoded_json = json_decode( file_get_contents('php://input'), true );
+
+			foreach( $decoded_json as $item ) {
+				$instagram = self::setup_api();
+				$image = $instagram->getMedia($item['object_id']);
+				$post_title = isset($image->data->caption) ? $image->data->caption : '(No Title)';
+				$args = array(
+					'post_title'  => $post_title,
+					'post_status'  => 'draft',	
+			 	);
+			 	$new_post = wp_insert_post( $args );
+		     	$new_image = media_sideload_image( $image->data->images->standard_resolution->url, $new_post, $post_title );
+
+			 	$new_args = array(
+			  	   'post_content' => $new_image,
+				   'post_status'  => 'publish'
+			 	);
+			 	wp_update_post( $new_args );
+			}
+		} else {
+			$instagram = self::setup_api();
+			$instagram->SubscriptionListener();
+		}
 	}
 }
 
