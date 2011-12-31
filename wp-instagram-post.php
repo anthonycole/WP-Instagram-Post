@@ -106,7 +106,15 @@ class WP_Instagram_Post {
 		   'apiSecret'   => $option['client_secret'],
 		   'apiCallback' => admin_url('options-general.php?page=wpinstac')
 		);
+	
 		$instagram = new Instagram( $options );
+		
+		$oauth_option = get_option( 'wpinstac_oauth' );
+		
+		// set our access token if it is active
+		if( isset( $oauth_option->access_token ) )
+			$instagram->setAccessToken($oauth_option->access_token );
+		
 		return $instagram;
 	}
 	
@@ -153,10 +161,10 @@ class WP_Instagram_Post {
 	public static function api_done() {
 		$option = get_option( 'wpinstac_oauth' );
 		
-		if( !isset($option->access_token) )
-			return false;
-		else
+		if( isset($option->access_token) )
 			return true;
+		else
+			return false;
 	}
 	
 	/**
@@ -177,15 +185,16 @@ class WP_Instagram_Post {
 				<?php do_settings_sections( 'wpinstac' ); ?>
 				<input name="Submit" type="submit" value="<?php esc_attr_e('Save Changes'); ?>" />
 			</form>
+			
 			<?php if( self::app_setup() && !self::api_done() ) :
 			$instagram = self::setup_api(); 
 			?>
 			<a href="<?php echo $instagram->getLoginUrl(); ?>">Log Into Instagram</a>
 			<?php endif; ?>
-
 		</div>
 		<?php
 	}
+	
 }
 
 // Fire!
