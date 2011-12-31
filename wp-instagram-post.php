@@ -37,8 +37,7 @@ class WP_Instagram_Post {
 	public static function forge() {
 		add_action( 'admin_init', get_class() . '::settings_init' );
 		add_action( 'admin_menu', get_class() . '::register_options_page' );
-		add_action( 'init', get_class() . '::listen' );	
-			
+		add_action( 'wp_loaded', get_class() . '::listen' );	
 	}
 	
 	/**
@@ -150,7 +149,9 @@ class WP_Instagram_Post {
 	 **/
 	public static function oauth_save() {
 		$instagram = self::setup_api();
-		$userData = $instagram->getOAuthToken($_GET['code']);	
+		$userData = $instagram->getOAuthToken($_GET['code']);
+		$userData = $instagram->AddUserSubscription();	
+
 		update_option('wpinstac_oauth', $userData );
 	}
 	
@@ -187,16 +188,6 @@ class WP_Instagram_Post {
 				<?php do_settings_sections( 'wpinstac' ); ?>
 				<input name="Submit" type="submit" value="<?php esc_attr_e('Save Changes'); ?>" />
 			</form>
-			<?php
-			
-				$instagram = self::setup_api(); 
-				var_dump($instagram->getMedia(3)->data->images->standard_resolution->url);
-				var_dump($instagram->getMedia(3)->data->caption);
-	
-				
-				
-			?>
-			
 			<?php if( self::app_setup() && !self::api_done() ) :
 			$instagram = self::setup_api(); 
 			?>
@@ -206,37 +197,56 @@ class WP_Instagram_Post {
 		<?php
 	}
 	
+		
 	/**
 	 * Subscriptions Listener
 	 *
 	 * @return void
 	 * @author Anthony Cole
 	 **/
-	public static function listen() {
-		if( !strpos( $_SERVER['REQUEST_URI'], 'wp-admin' ) ) 
-			return false;
-		
+	public function listen() {		
+		if( !strpos( $_SERVER['REQUEST_URI'], 'wp-admin' ) || isset($_POST['action'] ) ) 
+			return true;
+	
 		if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+			require_once(ABSPATH . '/wp-admin/includes/media.php');
+			require_once(ABSPATH . '/wp-admin/includes/file.php');
 
 			$decoded_json = json_decode( file_get_contents('php://input'), true );
-
-			foreach( $decoded_json as $item ) {
-				$instagram = self::setup_api();
-				$image = $instagram->getMedia($item['object_id']);
-				$post_title = isset($image->data->caption) ? $image->data->caption : '(No Title)';
-				$args = array(
-					'post_title'  => $post_title,
-					'post_status'  => 'draft',	
-			 	);
-			 	$new_post = wp_insert_post( $args );
-		     	$new_image = media_sideload_image( $image->data->images->standard_resolution->url, $new_post, $post_title );
-
-			 	$new_args = array(
-			  	   'post_content' => $new_image,
-				   'post_status'  => 'publish'
-			 	);
-			 	wp_update_post( $new_args );
+			
+			if( count($decoded_json) == 1 ) {
+					$instagram = self::setup_api();
+					
+					$image = $instagram->getUserMedia($decoded_json[0]['object_id'], 1);
+					
+					$post_title = isset($image->data->caption) ? $image->data->caption : '(No Title)';
+					
+					$args = array(
+						'post_title'  => $post_title,
+						'post_status'  => 'publish',
+						'post_content'	=> sprintf('<img src="%s" alt="%s" />', $image->data[0]->images->standard_resolution->url, $post_title)
+				 	);
+				
+				 	$new_post = wp_insert_post( $args );
+			} else {
+					foreach( $decoded_json as $item ) {
+						$instagram = self::setup_api();
+						$image = $instagram->getUserMedia($item['object_id']);
+						$post_title = isset($image->data->caption) ? $image->data->caption : '(No Title)';
+						$args = array(
+							'post_title'  => $post_title,
+							'post_status'  => 'draft',	
+					 	);
+					 	$args = array(
+							'post_title'  => $post_title,
+							'post_status'  => 'publish',
+							'post_content'	=> sprintf('<img src="%s" alt="%s" />', $image->data->images->standard_resolution->url, $post_title)
+					 	);
+					 	$new_post = wp_insert_post( $args );
+					}
 			}
+		
+			exit();
 		} else {
 			$instagram = self::setup_api();
 			$instagram->SubscriptionListener();
