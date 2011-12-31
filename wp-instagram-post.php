@@ -245,7 +245,6 @@ class WP_Instagram_Post {
 					 	$new_post = wp_insert_post( $args );
 					}
 			}
-		
 			exit();
 		} else {
 			$instagram = self::setup_api();
