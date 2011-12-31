@@ -184,6 +184,39 @@ class Instagram {
   }
 
   /**
+   * For subscriptions - echo the challenge key.
+   *
+   * @return mixed
+   */
+  public function SubscriptionChallenge() {
+  		echo $_GET['hub.challenge'];
+		exit();
+  }
+
+/**
+   * For subscriptions - add the subscription
+   *
+   * @return mixed
+   */
+  public function AddUserSubscription( ) {
+	$this->_makeCall( 'subscriptions', array( 'object' => 'user', 'aspect' => 'media' ) );
+  }
+
+  /**
+   * For subscriptions - act as a listener to the Instagram API - this should be hooked somewhere near the callback.
+   *
+   * @return mixed
+   */
+  public function SubscriptionListener() {
+	
+	if( isset($_GET['hub.challenge']) ) {
+		$this->SubscriptionChallenge();
+	} else {
+		return true;
+	}
+  }
+
+  /**
    * Get the OAuth data of a user by the returned callback code
    *
    * @param string $code                  OAuth2 code variable (after a successful login)
