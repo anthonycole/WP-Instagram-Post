@@ -32,6 +32,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 - Check header from Instagram on post request to make sure that its actually coming from Instagram
 - Write a unit test for what we can.
 - Clean up the Admin UI
+- Add a post format in to 
+- Add the ability to select a default category that an image is put into
 - Figure out best practice for subscriptions (deleting, status, etc)
 */
 
