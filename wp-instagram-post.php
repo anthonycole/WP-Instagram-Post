@@ -3,7 +3,8 @@
 Plugin Name: WP Instagram Post
 Version: 1.0a
 Plugin URI: http://anthonycole.me/wp-instagram-post/
-Description: Automatigcally creates a new blog post with any photos you create from Instagram. Please authorize your instagram account before you do anything, see the settings page.
+Description: Pushes your Instagram Photos to your WordPress blog in real-time. Every time you post a photo 
+
 Author: Anthony Cole
 Author URI: http://anthonycole.me/
 
@@ -212,9 +213,7 @@ class WP_Instagram_Post {
 			return true;
 	
 		if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-			require_once(ABSPATH . '/wp-admin/includes/media.php');
-			require_once(ABSPATH . '/wp-admin/includes/file.php');
-
+			
 			$decoded_json = json_decode( file_get_contents('php://input'), true );
 			
 			if( count($decoded_json) == 1 ) {
@@ -236,10 +235,6 @@ class WP_Instagram_Post {
 						$instagram = self::setup_api();
 						$image = $instagram->getUserMedia($item['object_id']);
 						$post_title = isset($image->data->caption) ? $image->data->caption : '(No Title)';
-						$args = array(
-							'post_title'  => $post_title,
-							'post_status'  => 'draft',	
-					 	);
 					 	$args = array(
 							'post_title'  => $post_title,
 							'post_status'  => 'publish',
