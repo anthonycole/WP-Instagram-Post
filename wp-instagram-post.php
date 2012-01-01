@@ -3,12 +3,9 @@
 Plugin Name: WP Instagram Post
 Version: 1.0a
 Plugin URI: http://anthonycole.me/wp-instagram-post/
-Description: Pushes your Instagram Photos to your WordPress blog in real-time. Every time you post a photo 
-
+Description: This plugin auto-posts every photo you post to Instagram to your WordPress Blog. Configuration Required. Use it at your own risk, it is heavily untested.
 Author: Anthony Cole
 Author URI: http://anthonycole.me/
-
-USE AT YOUR OWN RISK! This is heavily untested, but it works.
 
 Copyright 2011  (email: anthony@radiopicture.com.au )
 
@@ -28,8 +25,17 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 */
 
-require_once( plugin_dir_path( __FILE__ ) . 'vendor/instagram_api/instagram.class.php');
 
+/*
+@ Todo....
+- Stop using wp_loaded as a listener.
+- Check header from Instagram on post request to make sure that its actually coming from Instagram
+- Write a unit test for what we can.
+- Clean up the Admin UI
+- Figure out best practice for subscriptions (deleting, status, etc)
+*/
+
+require_once( plugin_dir_path( __FILE__ ) . 'vendor/instagram_api/instagram.class.php');
 
 class WP_Instagram_Post {
 	/**
@@ -39,8 +45,8 @@ class WP_Instagram_Post {
 	 * @author Anthony Cole
 	 **/
 	public static function forge() {
-		add_action( 'admin_init', get_class() . '::settings_init' );
-		add_action( 'admin_menu', get_class() . '::register_options_page' );
+		add_action( 'admin_init', get_class()  . '::settings_init' );
+		add_action( 'admin_menu', get_class()  . '::register_options_page' );
 		add_action( 'wp_loaded',  get_class()  . '::listen' );	
 	}
 	
@@ -211,9 +217,7 @@ class WP_Instagram_Post {
 			return true;
 	
 		if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-			
 			$decoded_json = json_decode( file_get_contents('php://input'), true );
-			
 			if( count($decoded_json) == 1 ) {
 					$instagram = self::setup_api();
 					
