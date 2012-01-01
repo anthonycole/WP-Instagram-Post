@@ -74,9 +74,9 @@ class Instagram {
   public function __construct($config) {
     if (true === is_array($config)) {
       // if you want to access user data
-      $this->setApiKey($config[apiKey]);
-      $this->setApiSecret($config[apiSecret]);
-      $this->setApiCallback($config[apiCallback]);
+      $this->setApiKey($config['apiKey']);
+      $this->setApiSecret($config['apiSecret']);
+      $this->setApiCallback($config['apiCallback']);
     } else if (true === is_string($config)) {
       // if you only want to access public data
       $this->setApiKey($config);

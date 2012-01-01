@@ -28,7 +28,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 */
 
-require_once('vendor/instagram.class.php');
+require_once( plugin_dir_path( __FILE__ ) . 'vendor/instagram_api/instagram.class.php');
 
 
 class WP_Instagram_Post {
@@ -41,7 +41,7 @@ class WP_Instagram_Post {
 	public static function forge() {
 		add_action( 'admin_init', get_class() . '::settings_init' );
 		add_action( 'admin_menu', get_class() . '::register_options_page' );
-		add_action( 'wp_loaded', get_class() . '::listen' );	
+		add_action( 'wp_loaded',  get_class()  . '::listen' );	
 	}
 	
 	/**
@@ -74,8 +74,6 @@ class WP_Instagram_Post {
 	 * @author Anthony Cole
 	 **/
 	public static function plugin_text() {
-		
-		
 		if( !self::api_done() ) : 
 			echo "<p>In order to get this plugin working, you're going to need to create an application with instagram. See <a href='http://instagr.am/developer/'>here</a> for instructions. </p>";
 		else : 
