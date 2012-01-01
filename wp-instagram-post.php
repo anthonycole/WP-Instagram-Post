@@ -1,11 +1,13 @@
 <?php
 /*
 Plugin Name: WP Instagram Post
-Version: 0.1
+Version: 1.0a
 Plugin URI: http://anthonycole.me/wp-instagram-post/
-Description: if you post a photo to instagram, this plugin throws it into a new blog post.
+Description: Automatigcally creates a new blog post with any photos you create from Instagram. Please authorize your instagram account before you do anything, see the settings page.
 Author: Anthony Cole
-Author URI: 
+Author URI: http://anthonycole.me/
+
+USE AT YOUR OWN RISK! This is heavily untested, but it works.
 
 Copyright 2011  (email: anthony@radiopicture.com.au )
 
@@ -22,6 +24,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
 */
 
 require_once('vendor/instagram.class.php');
