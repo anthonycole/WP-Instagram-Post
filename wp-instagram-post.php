@@ -49,7 +49,7 @@ class WP_Instagram_Post {
 	public static function forge() {
 		add_action( 'admin_init', get_class()  . '::settings_init' );
 		add_action( 'admin_menu', get_class()  . '::register_options_page' );
-		add_action( 'wp_loaded',  get_class()  . '::listen' );	
+		add_action( 'admin_post_nopriv',  get_class()  . '::listen' );	
 	}
 	
 	/**
@@ -83,7 +83,7 @@ class WP_Instagram_Post {
 	 **/
 	public static function plugin_text() {
 		if( !self::api_done() ) : 
-			echo "<p>In order to get this plugin working, you're going to need to create an application with instagram. See <a href='http://instagr.am/developer/'>here</a> for instructions. </p>";
+			echo "<p>In order to get this plugin working, you're going to need to create an application with instagram. See <a href='http://instagr.am/developer/'>here</a> for instructions. Your callback URI should be http://blog.com/wp-admin/admin-post.php?instagram_ac=yes</p>";
 		else : 
 			$option = get_option('wpinstac_oauth');
 			echo "<p>You are logged Into Instagram as " .  $option->user->username . "</p>";
@@ -210,12 +210,14 @@ class WP_Instagram_Post {
 		
 	/**
 	 * Subscriptions Listener
-	 *
+	 * 
+	 * You should be using http://blog.com/wp-admin/admin-post.php?instagram_ac=yes as your Instagram callback URI.
+	 *  
 	 * @return void
 	 * @author Anthony Cole
 	 **/
 	public function listen() {		
-		if( !strpos( $_SERVER['REQUEST_URI'], 'wp-admin' ) || isset($_POST['action'] ) ) 
+		if( $_REQUEST['instagram_ac'] != 'yes' ) 
 			return true;
 	
 		if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -225,7 +227,7 @@ class WP_Instagram_Post {
 					
 					$image = $instagram->getUserMedia($decoded_json[0]['object_id'], 1);
 					
-					$post_title = isset($image->data->caption) ? $image->data->caption : '(No Title)';
+					$post_title = isset($image->data[0]->caption) ? $image->data[0]->caption : '(No Title)';
 					
 					$args = array(
 						'post_title'  => $post_title,
