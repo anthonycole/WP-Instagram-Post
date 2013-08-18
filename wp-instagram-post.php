@@ -28,13 +28,12 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 /*
 @ Todo....
-- Stop using wp_loaded as a listener.
 - Check header from Instagram on post request to make sure that its actually coming from Instagram
 - Write a unit test for what we can.
 - Clean up the Admin UI
-- Add a post forma
+- Add a post format by default
 - Add the ability to select a default category that an image is put into
-- Figure out best practice for subscriptions (deleting, status, etc)
+- Figure out best practice for subscriptions to the instagram API (deleting, status, etc)
 */
 
 require_once( plugin_dir_path( __FILE__ ) . 'vendor/instagram_api/instagram.class.php');
