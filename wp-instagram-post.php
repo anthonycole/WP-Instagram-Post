@@ -83,7 +83,7 @@ class WP_Instagram_Post {
 	 **/
 	public static function plugin_text() {
 		if( !self::api_done() ) : 
-			echo "<p>In order to get this plugin working, you're going to need to create an application with instagram. See <a href='http://instagr.am/developer/'>here</a> for instructions. Your callback URI should be http://blog.com/wp-admin/admin-ajax.php?instagram_ac=yes</p>";
+			echo "<p>In order to get this plugin working, you're going to need to create an application with instagram. See <a href='http://instagr.am/developer/'>here</a> for instructions. Your callback URI should be http://blog.com/wp-admin/admin-ajax.php?action=instagram_ac</p>";
 		else : 
 			$option = get_option('wpinstac_oauth');
 			echo "<p>You are logged Into Instagram as " .  $option->user->username . "</p>";
@@ -211,18 +211,12 @@ class WP_Instagram_Post {
 	/**
 	 * Subscriptions Listener
 	 * 
-	 * You should be using http://blog.com/wp-admin/admin-ajax.php.php?instagram_ac=yes as your Instagram callback URI.
+	 * You should be using http://blog.com/wp-admin/admin-ajax.php.php?action=instagram_ac as your Instagram callback URI.
 	 *  
 	 * @return void
 	 * @author Anthony Cole
 	 **/
 	public function listen() {
-
-
-		if( $_REQUEST['instagram_ac'] != 'yes' ) 
-			return true;
-	
-
 		if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 			$decoded_json = json_decode( file_get_contents('php://input'), true );
 			if( count($decoded_json) == 1 ) {
@@ -252,14 +246,12 @@ class WP_Instagram_Post {
 					 	$new_post = wp_insert_post( $args );
 					}
 			}
-			exit();
 		} else {
-
 			$instagram = self::setup_api();
 			$instagram->SubscriptionListener();
 
-			die();
 		}
+		die();
 	}
 }
 
