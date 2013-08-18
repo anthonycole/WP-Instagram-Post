@@ -2,7 +2,7 @@
 /*
 Plugin Name: WP Instagram Post
 Version: 1.0a
-Plugin URI: http://anthonycole.me/wp-instagram-post/
+Plugin URI: http://anthonycole.me/
 Description: This plugin auto-posts every photo you post to Instagram to your WordPress Blog. Configuration Required. Use it at your own risk, it is heavily untested.
 Author: Anthony Cole
 Author URI: http://anthonycole.me/
